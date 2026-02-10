@@ -1,51 +1,38 @@
 import { expect, test } from '@playwright/test';
 
-test('Browser Context Playwright Test', async ({browser}) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
-    await page.goto('https://rahulshettyacademy.com/loginpagePractise/');
-    console.log(await page.title());
-    expect(await page.title()).toBe('LoginPage Practise | Rahul Shetty Academy');
+// Use env vars for credentials to avoid committing secrets.
+const VALID_USER = process.env.TEST_USER || '';
+const VALID_PASS = process.env.TEST_PASS || '';
 
-    // input the username and password
-    await page.locator('#username').fill('rahulshettyacademy');
-    await page.locator('#password').fill('Learning@830$3mK2');
+test.describe('Login tests', () => {
+    test.beforeEach(async ({ page }) => {
+        await page.goto('https://rahulshettyacademy.com/loginpagePractise/');
+        await expect(page).toHaveTitle('LoginPage Practise | Rahul Shetty Academy');
+    });
 
-    // sign in button
-    await page.locator('#signInBtn').click();
+    test('valid credentials should not show error', async ({ page }) => {
+        // Provide credentials via environment variables in CI or local runs
+        await page.locator('#username').fill(VALID_USER);
+        await page.locator('#password').fill(VALID_PASS);
+        await page.locator('#signInBtn').click();
+
+        // Assert that the visible error alert is not shown
+        await expect(page.locator('[style*="block"]')).toHaveCount(0);
+    });
+
+    test('shows error for invalid credentials', async ({ page }) => {
+        await page.locator('#username').fill('invalid_user');
+        await page.locator('#password').fill('invalid_pass');
+        await page.locator('#signInBtn').click();
+
+        const alert = page.locator('[style*="block"]');
+        await expect(alert).toHaveText('Incorrect username/password.');
+    });
 });
 
-test.only('Test the invalid credentials Test', async ({browser}) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
-    await page.goto('https://rahulshettyacademy.com/loginpagePractise/');
-    console.log(await page.title());
-    expect(await page.title()).toBe('LoginPage Practise | Rahul Shetty Academy');
-
-    // input the username and password
-    await page.locator('#username').fill('3rahulshettyacademy');
-    await page.locator('#password').fill('8Learning@830$3mK2');
-
-    // sign in button
-    await page.locator('#signInBtn').click();
-
-    // to get the text of the alert
-    const alertText = await page.locator('[style*="block"]').textContent();
-    console.log(alertText);
-    expect(alertText).toBe('Incorrect username/password.');
-});
-
-
-test('Page Playwright Test', async ({page}) => {
+test('Page Playwright Test', async ({ page }) => {
     await page.goto('https://google.com');
-
-    // to get the title of the page
-    const title = await page.title();
-    console.log(title);
-    expect(title).toBe('Google');
-    //expect(page.url()).toBe('https://www.google.com/');
+    await expect(page).toHaveTitle('Google');
     expect(page.url()).toContain('google');
     expect(page.url()).toMatch(/google/);
-    await expect(page).toHaveTitle("Google");
-    
 });
