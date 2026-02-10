@@ -26,7 +26,8 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run Playwright tests
-        run: npx playwright test --reporter=github
+        # include the HTML reporter so `playwright-report/` folder is created
+        run: npx playwright test --reporter=github,html
         env:
           CI: true
 
