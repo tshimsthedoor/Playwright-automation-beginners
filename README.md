@@ -148,6 +148,53 @@ npx playwright test --trace=on
 - Learn about parallel test execution
 - Practice with multiple browsers (Chromium, Firefox)
 
+## Feature Branch: form-validation
+
+- **Branch name:** `feature/form-validation`
+- **Create branch locally:**
+   ```bash
+   git checkout -b feature/form-validation
+   ```
+- **Push branch to remote:**
+   ```bash
+   git push -u origin feature/form-validation
+   ```
+
+This branch is intended for adding automated tests that verify form validation behavior (required fields, invalid input handling, error messages, and successful submissions).
+
+Suggested test file: `tests/formValidation.spec.js`
+
+Suggested test cases:
+- Required fields show validation messages when left empty
+- Invalid email formats show appropriate error
+- Password strength / validation rules are enforced
+- Successful submission with valid input shows success message or redirect
+- Accessibility checks for form controls and error announcements
+
+Quick test skeleton to get started:
+
+```javascript
+import { test, expect } from '@playwright/test';
+
+test.describe('Form validation', () => {
+   test.beforeEach(async ({ page }) => {
+      await page.goto('https://example.com/form');
+   });
+
+   test('shows required field errors', async ({ page }) => {
+      await page.click('button[type="submit"]');
+      await expect(page.locator('.error')).toHaveCount(1);
+   });
+});
+```
+
+Tips:
+- Use `page.locator()` with clear selectors for stable tests.
+- Reuse `beforeEach` to navigate to the form and set up state.
+- Capture screenshots, video, and trace on failures (config already enables these).
+- Create small, focused tests for each validation rule.
+
+
 ## Resources
 
 - [Playwright Official Documentation](https://playwright.dev)

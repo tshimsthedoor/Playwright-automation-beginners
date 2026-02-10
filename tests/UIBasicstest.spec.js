@@ -1,11 +1,18 @@
 import { expect, test } from '@playwright/test';
 
-test('Browser Context Playwright Test', async ({browser}) => {
+test.only('Browser Context Playwright Test', async ({browser}) => {
     const context = await browser.newContext();
     const page = await context.newPage();
     await page.goto('https://rahulshettyacademy.com/loginpagePractise/');
     console.log(await page.title());
     expect(await page.title()).toBe('LoginPage Practise | Rahul Shetty Academy');
+
+    // input the username and password
+    await page.locator('#username').fill('rahulshettyacademy');
+    await page.locator('#password').fill('Learning@830$3mK2');
+
+    // sign in button
+    await page.locator('#signInBtn').click();
 });
 
 test('Page Playwright Test', async ({page}) => {
