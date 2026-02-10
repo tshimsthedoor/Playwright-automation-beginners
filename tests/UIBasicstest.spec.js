@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test.only('Browser Context Playwright Test', async ({browser}) => {
+test('Browser Context Playwright Test', async ({browser}) => {
     const context = await browser.newContext();
     const page = await context.newPage();
     await page.goto('https://rahulshettyacademy.com/loginpagePractise/');
@@ -14,6 +14,27 @@ test.only('Browser Context Playwright Test', async ({browser}) => {
     // sign in button
     await page.locator('#signInBtn').click();
 });
+
+test.only('Test the invalid credentials Test', async ({browser}) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.goto('https://rahulshettyacademy.com/loginpagePractise/');
+    console.log(await page.title());
+    expect(await page.title()).toBe('LoginPage Practise | Rahul Shetty Academy');
+
+    // input the username and password
+    await page.locator('#username').fill('3rahulshettyacademy');
+    await page.locator('#password').fill('8Learning@830$3mK2');
+
+    // sign in button
+    await page.locator('#signInBtn').click();
+
+    // to get the text of the alert
+    const alertText = await page.locator('[style*="block"]').textContent();
+    console.log(alertText);
+    expect(alertText).toBe('Incorrect username/password.');
+});
+
 
 test('Page Playwright Test', async ({page}) => {
     await page.goto('https://google.com');
