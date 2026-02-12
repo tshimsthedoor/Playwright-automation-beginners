@@ -28,11 +28,29 @@ test.describe('Login tests', () => {
         const alert = page.locator('[style*="block"]');
         await expect(alert).toHaveText('Incorrect username/password.');
     });
-});
+
+    test.only('Browser Context-Validating Error login', async ({ browser }) => {
+        const userName = page.locator('#username');
+        const password = page.locator("[type='password']");
+        const signInBtn = page.locator('#signInBtn');
+        const context = await browser.newContext();
+        const page = await context.newPage();
+        await page.goto('https://rahulshettyacademy.com/loginpagePractise/');
+        console.log(await page.title());
+        // css
+        await userName.fill('rahulshetty');
+        await password.fill('learning');
+        await signInBtn.click();
+       
+        console.log(await page.locator('[style*="block"]').textContent());
+        await expect(page.locator('[style*="block"]')).toHaveText('Incorrect username/password.');
+        
+    });
 
 test('Page Playwright Test', async ({ page }) => {
     await page.goto('https://google.com');
     await expect(page).toHaveTitle('Google');
     expect(page.url()).toContain('google');
     expect(page.url()).toMatch(/google/);
+});
 });

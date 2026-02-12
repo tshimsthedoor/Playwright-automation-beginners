@@ -1,0 +1,19 @@
+FROM mcr.microsoft.com/playwright:latest
+
+WORKDIR /work
+
+# Copy only package files first for better layer caching
+COPY package.json package-lock.json* ./
+
+# Install dependencies (includes devDependencies so Playwright is available)
+RUN npm ci --silent
+
+# Copy rest of the project
+COPY . .
+
+# Ensure Playwright browsers and deps are installed (image usually has them,
+# but this ensures compatibility and installs any missing browsers)
+RUN npx playwright install --with-deps
+
+# Default: run Playwright tests and exit
+CMD ["npx", "playwright", "test", "--reporter=list"]
