@@ -3,7 +3,7 @@ services:
     image: firsttest
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: ./Dockerfile.playwright
     environment:
       NODE_ENV: production
     ports:
