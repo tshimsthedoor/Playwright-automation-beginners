@@ -12,15 +12,16 @@ const config = ({
   expect: {
     timeout: 50 * 1000
   },
-  reporter: 'html',
+  reporter: [['list'], ['html']],
   
   use: {
     browserName: 'webkit',
-      // Run headed locally for learning, but run headless in CI environments
-      headless: !!process.env.CI,
-     screenshot: 'on',
-     video: 'on',
-     trace: 'on',
+    // Always run headless in containers and CI, headed only locally when explicitly set
+    // headless: !process.env.HEADED,
+    headless: false,
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+    trace: 'retain-on-failure',
     
   },
   

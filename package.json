@@ -7,7 +7,9 @@
     "test": "npx playwright test",
     "test:ui": "npx playwright test --ui",
     "test:debug": "npx playwright test --debug",
-    "test:docker": "docker-compose up"
+    "test:docker": "docker-compose up",
+    "test:html": "npx playwright test --reporter=html",
+    "report": "npx playwright show-report"
 
   },
   "keywords": [],

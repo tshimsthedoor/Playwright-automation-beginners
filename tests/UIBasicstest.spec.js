@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
 
+const VALID_EMAIL = 'anshika@gmail.com';
+const VALID_PASSWORD = 'Iamking@000';
 const VALID_USER = 'rahulshettyacademy';
 const VALID_PASS = 'Learning@830$3mK2';
 const LOGIN_PAGE_URL = 'https://rahulshettyacademy.com/loginpagePractise/';
@@ -10,6 +12,22 @@ async function login(page, username, password) {
     await page.locator('#password').fill(password);
     await page.locator('#signInBtn').click();
     await page.waitForTimeout(600);
+}
+
+async function attachJson(name, data) {
+    await test.info().attach(name, {
+        body: JSON.stringify(data, null, 2),
+        contentType: 'application/json',
+    });
+}
+
+async function attachJsonOnFailure(name, data, assertion) {
+    try {
+        await assertion();
+    } catch (error) {
+        await attachJson(name, data);
+        throw error;
+    }
 }
 
 test.describe('Login Tests', () => {
@@ -134,7 +152,9 @@ test.describe('Login Tests', () => {
     test('💡 First course name shown', async ({ page }) => {
         await login(page, VALID_USER, VALID_PASS);
         const course = await page.locator('.card-body a').first().textContent();
-        expect(course).toBeTruthy();
+        await attachJsonOnFailure('first-course', { course }, async () => {
+            expect(course).toBeTruthy();
+        });
     });
 });
 
@@ -149,6 +169,45 @@ test('🌐 Should navigate to login page successfully', async ({ page }) => {
 
 test('🌐 Google homepage should have correct title', async ({ page }) => {
     await page.goto('https://google.com');
-    await expect(page).toHaveTitle('Google');
-    expect(page.url()).toContain('google');
+    const title = await page.title();
+    const pageMeta = { title, url: page.url() };
+    await attachJsonOnFailure('google-page-meta', pageMeta, async () => {
+        await expect(page).toHaveTitle('Google');
+        expect(page.url()).toContain('google');
+    });
+});
+
+test('UI Controls on Client App', async ({ page }) => {
+        await page.goto('https://rahulshettyacademy.com/loginpagePractise/');
+        const userName = page.locator('#username');
+        const signInBtn = page.locator('#signInBtn');
+        const dropdown = page.locator('select.form-control');
+        await dropdown.selectOption('consult');
+        // await page.locator('.radiotextstyle').last().click();
+        // await page.locator('#okayBtn').click();
+        // await expect(page.locator('.radiotextstyle').last()).toBeChecked();
+        // await expect(page.locator('.radiotextstyle').first()).not.toBeChecked();
+        const userRadio = page.locator("input[value='user']");
+        await userRadio.check(); // clicks actual radio input
+        await page.locator('#okayBtn').click();
+        await expect(userRadio).toBeChecked();
+        await expect(page.locator("input[value='admin']")).not.toBeChecked();
+        await page.pause();
+    });
+
+test('@wc Client App login', async ({ page }) => {
+    test.setTimeout(90000);
+    await page.goto('https://rahulshettyacademy.com/client');
+    await page.locator('#userEmail').fill(VALID_EMAIL);
+    await page.locator('#userPassword').fill(VALID_PASSWORD);
+    await page.locator('#login').click();
+    await page.locator('.card-body b').first().waitFor({ state: 'attached' });
+    const titles = (await page.locator('.card-body b').allTextContents())
+        .map((title) => title.trim())
+        .filter(Boolean);
+    await attachJsonOnFailure('product-titles', titles, async () => {
+        expect(titles.length).toBeGreaterThan(0);
+    });
+
+    
 });

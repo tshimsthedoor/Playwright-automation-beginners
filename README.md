@@ -50,44 +50,100 @@ first-test/
 
 ## Running Tests
 
+### Local Execution
+
 Execute the tests using Playwright:
 
 ```bash
 # Run all tests
-npx playwright test
+npm test
 
-# Run tests in headed mode (see browser)
+# Run tests in headed mode (see browser in action)
 npx playwright test --headed
 
-# Run tests with UI mode (interactive)
+# Run tests with UI mode (interactive dashboard)
 npx playwright test --ui
 
-# Run specific test file
-npx playwright test UIBasicstest.spec.js
+# Run specific test by pattern
+npx playwright test --grep "case sensitive"
 
-# Debug tests
+# Debug tests (step through code)
 npx playwright test --debug
 ```
 
+### Docker Execution
+
+Run tests in a containerized environment for consistent results across all machines:
+
+```bash
+# Build image and run tests
+docker-compose up --build
+
+# Run tests only (image already built)
+docker-compose up
+
+# Stop containers
+docker-compose down
+```
+
+**Benefits of Docker:**
+- Guaranteed same environment everywhere
+- No dependency on local Node.js/browser versions
+- Perfect for CI/CD pipelines
+- Eliminates "works on my machine" problems
+
 ## Test Cases
 
-### Test 1: Browser Context Playwright Test
-- **Purpose**: Demonstrates browser context creation and page navigation
-- **Steps**:
-  1. Creates a new browser context
-  2. Creates a new page within the context
-  3. Navigates to the Rahul Shetty Academy login practice page
-  4. Verifies the page title is "LoginPage Practise | Rahul Shetty Academy"
+### Comprehensive Login Test Suite (23 Tests)
 
-### Test 2: Page Playwright Test
-- **Purpose**: Demonstrates page navigation and various assertion methods
-- **Steps**:
-  1. Navigates to Google.com
-  2. Retrieves and logs the page title
-  3. Verifies title equals "Google" 
-  4. Verifies URL contains "google"
-  5. Verifies URL matches regex pattern `/google/`
-  6. Uses Playwright's built-in assertion for title
+The test suite covers real-world login scenarios with thorough validation:
+
+#### ✅ **Valid Credentials** (3 tests)
+- Login with valid credentials shows no error
+- Successful login displays course content
+- First course name is displayed on dashboard
+
+#### ❌ **Invalid Credentials** (3 tests)
+- Wrong username displays error message
+- Wrong password displays error message
+- Both credentials wrong displays error
+
+#### ⚠️ **Empty Fields** (2 tests)
+- Empty username fails with error
+- Empty password fails with error
+
+#### 🔐 **Security & Case Sensitivity** (2 tests)
+- Username is case-sensitive
+- Password is case-sensitive
+
+#### 📝 **Form Elements Visibility** (3 tests)
+- Username input field is visible
+- Password input field is visible
+- Sign in button is visible
+
+#### ⌨️ **User Interactions** (4 tests)
+- Can type in username field
+- Can type in password field
+- Can clear username field
+- Can clear password field
+
+#### 🔤 **Edge Cases & Input** (3 tests)
+- Handles very long username (100 characters)
+- Rejects numeric-only username
+- Rejects numeric-only password
+
+#### 📄 **Page Verification** (1 test)
+- Page title matches expected value
+
+#### 🔄 **Session Management** (2 tests)
+- Multiple failed attempts allow subsequent login
+- First course name is displayed after login
+
+#### 🌐 **Navigation** (2 tests)
+- Successfully navigates to login page
+- Google homepage has correct title
+
+**Total: 23 Passing Tests** ✅
 
 ## Configuration Details
 
@@ -98,6 +154,52 @@ The `playwright.config.js` file contains:
 | testDir | `./tests` | Directory containing test files |
 | timeout | 40 seconds | Maximum time per test |
 | expect.timeout | 40 seconds | Maximum time for assertions |
+
+## Best Practices Used
+
+### ✅ Code Quality
+- **Helper Functions**: `login()` reduces duplication
+- **Constants**: Centralized test data at top of file
+- **DRY Principle**: `beforeEach()` for common setup
+- **Meaningful Names**: Test names clearly describe what they verify
+- **Clear Organization**: Tests grouped by functionality
+
+### ✅ Testing Strategy
+- **Positive Testing**: Valid credentials work correctly
+- **Negative Testing**: Invalid inputs properly rejected
+- **Boundary Testing**: Edge cases like long inputs
+- **State Testing**: Session management scenarios
+- **UI Testing**: Element visibility and interaction
+
+### ✅ Assertions Used
+- `.toHaveCount(0)` - Element count verification
+- `.toContainText()` - Text content validation
+- `.toBeVisible()` - Element visibility check
+- `.toHaveTitle()` - Page title assertion
+- `.inputValue()` - Field value verification
+
+## Adding New Tests
+
+To add a new login scenario test:
+
+```javascript
+test('🔍 Your test description', async ({ page }) => {
+    // 1. Setup
+    await login(page, VALID_USER, VALID_PASS);
+    
+    // 2. Action (if needed)
+    // await page.locator('#element').click();
+    
+    // 3. Assert
+    // await expect(page.locator('#expected')).toBeVisible();
+});
+```
+
+**Workflow:**
+1. Write test locally: `npm test -- --ui`
+2. Debug if needed: `npm test -- --debug`
+3. Verify in Docker: `docker-compose up`
+4. Commit and push
 | reporter | html | Generates HTML test reports |
 | browserName | webkit | Uses WebKit (Safari engine) |
 | headless | false | Show browser window during tests |
