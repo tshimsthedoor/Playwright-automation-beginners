@@ -182,6 +182,7 @@ test('UI Controls on Client App', async ({ page }) => {
         const userName = page.locator('#username');
         const signInBtn = page.locator('#signInBtn');
         const dropdown = page.locator('select.form-control');
+        const documentLink = page.locator('.blinkingText');
         await dropdown.selectOption('consult');
         // await page.locator('.radiotextstyle').last().click();
         // await page.locator('#okayBtn').click();
@@ -192,6 +193,11 @@ test('UI Controls on Client App', async ({ page }) => {
         await page.locator('#okayBtn').click();
         await expect(userRadio).toBeChecked();
         await expect(page.locator("input[value='admin']")).not.toBeChecked();
+        await page.locator('#terms').check();
+        expect(await page.locator('#terms').isChecked()).toBeTruthy();
+        await page.locator('#terms').uncheck();
+        expect(await page.locator('#terms').isChecked()).toBeFalsy();
+        await expect(documentLink).toHaveAttribute('href', 'https://rahulshettyacademy.com/documents-request');
         await page.pause();
     });
 
@@ -207,7 +213,33 @@ test('@wc Client App login', async ({ page }) => {
         .filter(Boolean);
     await attachJsonOnFailure('product-titles', titles, async () => {
         expect(titles.length).toBeGreaterThan(0);
-    });
-
+    }); 
     
 });
+
+ test.only('Child window handling', async ({ page }) => {
+        await page.goto('https://rahulshettyacademy.com/loginpagePractise/');
+        const [newPage] = await Promise.all([
+            page.waitForEvent('popup'),
+            page.locator('.blinkingText').click(),
+        ]);
+        await newPage.waitForLoadState();
+        const title = await newPage.title();
+        const url = newPage.url();
+        expect(title).toBe('RS Academy');
+        expect(url).toBe('https://rahulshettyacademy.com/documents-request');
+        const para = await newPage.locator('.red').textContent();
+        await attachJsonOnFailure('child-window-content', { title, url, para }, async () => {
+            expect(para).toContain('Please email us at mentor@rahulshettyacademy.com with below template to receive response');
+        });
+        console.log('Child window content:', { title, url, para });
+
+        // now pull the email from the text and use it in the parent window
+        const emailMatch = para.match(/email us at (\S+)/);
+        const email = emailMatch ? emailMatch[1] : null;
+        expect(email).toBe('mentor@rahulshettyacademy.com'); 
+        await page.locator('#username').fill(email);
+        console.log('Filled email in parent window:', await page.locator('#username').inputValue());
+        console.log('Extracted email:', email);
+        await page.pause();
+    });
